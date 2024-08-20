@@ -1,31 +1,18 @@
 import UAParser from "ua-parser-js";
-import { getCookies, getCookie } from "@/js/utils/cookie";
 import { getIpData } from "@/js/utils/ip";
 
-export async function createSessionData(userId) {
+export async function createSessionData(userId, service, accessToken, refreshToken) {
     try {
         const parser = new UAParser();
         const deviceInfo = parser.getResult();
-        const jwtTokens = getCookies('accessToken', 'refreshToken');
-        const serviceName = getCookie('serviceName');
         const ipData = await getIpData();
-
-        if (!userId) {
-            throw new Error('Missing user id');
-        }
-        if (!jwtTokens.accessToken || !jwtTokens.refreshToken) {
-            throw new Error('Missing JWT tokens');
-        }
-        if (!ipData || !ipData.city || !ipData.country_name) {
-            throw new Error('Missing IP data');
-        }
 
         return {
             userId: userId,
-            accessToken: jwtTokens.accessToken,
-            refreshToken: jwtTokens.refreshToken,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
             device: `${deviceInfo.browser.name} ${deviceInfo.browser.major}`,
-            service: serviceName,
+            service: service,
             os: `${deviceInfo.os.name} ${deviceInfo.os.version}`,
             location: `${ipData.city}, ${ipData.country_name}`
         };

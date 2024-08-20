@@ -1,6 +1,6 @@
 <script>
-import { handleRedirect} from "@/js/service/auth/oauth_redirect";
-import { sendCode } from "@/js/service/auth/oauth";
+import { handleRedirect} from "@/js/service/auth/redirect";
+import { sendCode } from "@/js/service/auth/auth";
 
 export default {
   name: "RedirectHandler",

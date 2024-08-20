@@ -9,8 +9,3 @@ export function openAuthPage() {
 
     window.location.href = `${authPageUri}?${params.toString()}`;
 }
-
-
-
-
-

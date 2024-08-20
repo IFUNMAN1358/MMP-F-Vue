@@ -1,3 +1,17 @@
+import { getCookie } from "@/js/utils/cookie";
+
+export function possibleRedirect(refreshToken) {
+    const redirectUri = getCookie('redirectUri');
+    if (redirectUri) {
+
+        const params = new URLSearchParams({
+            refreshToken: refreshToken
+        });
+
+        window.location.href = `${redirectUri}?${params.toString()}`;
+    }
+}
+
 export function handleRedirect() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('code');

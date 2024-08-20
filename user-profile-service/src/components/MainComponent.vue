@@ -1,5 +1,5 @@
 <script>
-import { openAuthPage } from '@/js/auth_service/page';
+import { openAuthPage } from '@/js/service/auth/redirect';
 
 export default {
   name: "MainComponent",

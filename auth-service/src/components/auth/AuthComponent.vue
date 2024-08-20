@@ -1,6 +1,6 @@
 <script>
-import { login } from "@/js/service/auth/login";
-import { loginWithGoogle, loginWithFacebook, loginWithYandex } from "@/js/service/auth/oauth_redirect";
+import { login } from "@/js/service/auth/auth";
+import { loginWithGoogle, loginWithFacebook, loginWithYandex } from "@/js/service/auth/redirect";
 import { setCookies } from "@/js/utils/cookie";
 
 export default {
@@ -16,7 +16,12 @@ export default {
     }
   },
   created() {
-    this.setUrlParams()
+    const urlParams = new URLSearchParams(window.location.search);
+
+    setCookies({
+      redirectUri: urlParams.get('redirectUri') || '',
+      serviceName: urlParams.get('serviceName') || process.env.VUE_APP_SERVICE_NAME
+    })
   },
   methods: {
     loginWithGoogle,
@@ -29,14 +34,6 @@ export default {
       } catch (error) {
         console.error('Login failed:', error);
       }
-    },
-    setUrlParams() {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      setCookies({
-        redirectUri: urlParams.get('redirectUri') || '',
-        serviceName: urlParams.get('serviceName') || process.env.VUE_APP_SERVICE_NAME
-      })
     }
   }
 };

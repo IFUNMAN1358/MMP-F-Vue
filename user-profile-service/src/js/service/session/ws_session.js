@@ -1,6 +1,6 @@
-import socket from "@/js/config/ws";
 import { Client } from '@stomp/stompjs';
 import { getCookie } from "@/js/utils/cookie";
+import socket from "@/js/config/ws";
 
 export function sessionSubscribe() {
     const stompClient = new Client({

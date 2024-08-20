@@ -1,22 +1,19 @@
-import axios from '@/axios';
+import axios from "@/js/config/axios";
 import { getCookie, setCookies } from "@/js/utils/cookie";
 import { createSessionData } from '@/js/service/session/session_data'
 
 export async function getSessions() {
     const accessToken = getCookie('accessToken');
-    return await axios.get('/api/session', {
-        params: {
-            service: `${process.env.VUE_APP_SERVICE_NAME}`
-        },
+    return await axios.get('/api/sessions', {
         headers: {
             Authorization: `Bearer ${accessToken}`
         }
     });
 }
 
-export async function createSession(userId) {
+export async function createSession(userId, service, accessToken, refreshToken) {
 
-    const sessionData = await createSessionData(userId);
+    const sessionData = await createSessionData(userId, service, accessToken, refreshToken);
 
     try {
         const response = await axios.post('/api/session', sessionData);
@@ -26,23 +23,15 @@ export async function createSession(userId) {
     }
 }
 
-export async function updateSession() {
-    const refreshToken = getCookie('refreshToken');
-
-    if (refreshToken) {
-        const response = await axios.post("/api/session/update", {
-            refreshToken: refreshToken
-        });
-        const tokens = response.data;
-        if (tokens.accessToken && tokens.refreshToken) {
-            setCookies({
-                'accessToken': tokens.accessToken,
-                'refreshToken': tokens.refreshToken
-            });
-        } else {
-            throw new Error("Invalid tokens received from the server");
-        }
-    }
+export async function updateSession(refreshToken) {
+    const response = await axios.post("/api/session/update", {
+        refreshToken: refreshToken
+    });
+    setCookies({
+        'accessToken': response.data.accessToken,
+        'refreshToken': response.data.refreshToken
+    });
+    return response;
 }
 
 export async function deleteSession(sessionId) {

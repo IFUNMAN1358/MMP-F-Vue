@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {getCookie, removeCookies} from "@/js/utils/cookie";
-import {updateSession} from "@/js/service/session/session";
+import { getCookies, removeCookies, setCookies} from "@/js/utils/cookie";
+import { updateSession } from "@/js/service/session/session";
 
 axios.defaults.baseURL = process.env.VUE_APP_BACK_BASE_URL
 
@@ -15,9 +15,16 @@ axios.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                const refreshToken = getCookie('refreshToken');
-                if (refreshToken) {
-                    const response = await updateSession(refreshToken);
+                const c = getCookies('accessToken', 'refreshToken');
+                const service = process.env.VUE_APP_SERVICE_NAME;
+
+                if (c.accessToken && c.refreshToken) {
+                    const response = await updateSession(null, service, c.accessToken, c.refreshToken);
+
+                    setCookies({
+                        'accessToken': response.data.accessToken,
+                        'refreshToken': response.data.refreshToken
+                    });
 
                     originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
                     return axios(originalRequest);

@@ -1,5 +1,5 @@
 import axios from "@/js/config/axios";
-import {setCookies} from "@/js/utils/cookie";
+import { createSessionData } from "@/js/service/session/session_data";
 
 export async function getSession(refreshToken) {
     return await axios.get('/api/session', {
@@ -9,13 +9,11 @@ export async function getSession(refreshToken) {
     });
 }
 
-export async function updateSession(refreshToken) {
-    const response = await axios.post("/api/session/update", {
-        refreshToken: refreshToken
-    });
-    setCookies({
-        'accessToken': response.data.accessToken,
-        'refreshToken': response.data.refreshToken
-    });
-    return response;
+export async function updateSession(userId, service, accessToken, refreshToken) {
+    try {
+        const sessionData = await createSessionData(userId, service, accessToken, refreshToken);
+        return await axios.post("/api/session/update", sessionData);
+    } catch (error) {
+        throw new Error(`Failed to update session: ${error}`);
+    }
 }

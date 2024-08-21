@@ -1,5 +1,5 @@
 import axios from "@/js/config/axios";
-import { getCookie, setCookies } from "@/js/utils/cookie";
+import { getCookie } from "@/js/utils/cookie";
 import { createSessionData } from '@/js/service/session/session_data'
 
 export async function getSessions() {
@@ -12,26 +12,21 @@ export async function getSessions() {
 }
 
 export async function createSession(userId, service, accessToken, refreshToken) {
-
-    const sessionData = await createSessionData(userId, service, accessToken, refreshToken);
-
     try {
-        const response = await axios.post('/api/session', sessionData);
-        return response.data;
+        const sessionData = await createSessionData(userId, service, accessToken, refreshToken);
+        return await axios.post('/api/session', sessionData);
     } catch (error) {
-        throw new Error('Failed to create session');
+        throw new Error(`Failed to create session: ${error}`);
     }
 }
 
-export async function updateSession(refreshToken) {
-    const response = await axios.post("/api/session/update", {
-        refreshToken: refreshToken
-    });
-    setCookies({
-        'accessToken': response.data.accessToken,
-        'refreshToken': response.data.refreshToken
-    });
-    return response;
+export async function updateSession(userId, service, accessToken, refreshToken) {
+    try {
+        const sessionData = await createSessionData(userId, service, accessToken, refreshToken);
+        return await axios.post("/api/session/update", sessionData);
+    } catch (error) {
+        throw new Error(`Failed to update session: ${error}`);
+    }
 }
 
 export async function deleteSession(sessionId) {

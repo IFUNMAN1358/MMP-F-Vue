@@ -1,6 +1,6 @@
 <script>
-import { getSessions, deleteSession } from "@/js/service/session/session";
 import { format } from 'date-fns';
+import {deleteSession, getSessions} from "@/js/repository/sessionRepository";
 
 export default {
   name: "LogoutComponent",
@@ -9,26 +9,18 @@ export default {
       sessions: []
     }
   },
+  async created() {
+    const response = await getSessions();
+    this.sessions = response.data;
+  },
   methods: {
-    async getSessions() {
-      try {
-        const response = await getSessions();
-        this.sessions = response.data;
-      } catch (error) {
-        console.log(error);
-    }
-    },
     async deleteSession(sessionId) {
-      try {
-        await deleteSession(sessionId);
-        await this.getSessions();
-      } catch (error) {
-        console.error(error);
-      }
+      await deleteSession(sessionId);
+      const response = await getSessions();
+      this.sessions = response.data;
     },
-    formatLastActivity(lastActivity) {
-      if (!lastActivity) return '';
-      return format(new Date(lastActivity), 'yyyy-MM-dd HH:mm:ss');
+    format(attr) {
+      return format(new Date(attr), 'yyyy-MM-dd HH:mm:ss');
     }
   }
 }
@@ -36,10 +28,9 @@ export default {
 
 <template>
   <div>
-    <button @click="getSessions">Get sessions</button>
     <ul>
       <li v-for="session in sessions" :key="session.sessionId">
-        {{ session.sessionId }} | {{ session.device }} | {{ session.service }} | {{ session.os }} | {{ session.location }} | {{ formatLastActivity(session.lastActivity) }}
+        {{ session.sessionId }} | {{ session.deviceName }} | {{ session.serviceName }} | {{ session.deviceOs }} | {{ session.location }} | {{ format(session.createdAt) }} | {{ format(session.lastActivity) }}
         <button @click="deleteSession(session.sessionId)">Delete</button>
       </li>
     </ul>

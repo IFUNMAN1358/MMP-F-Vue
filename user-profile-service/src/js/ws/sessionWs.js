@@ -1,6 +1,6 @@
-import socket from "@/js/config/ws";
 import { Client } from '@stomp/stompjs';
 import { getCookie } from "@/js/utils/cookie";
+import socket from "@/js/config/ws";
 
 export function sessionSubscribe() {
     const stompClient = new Client({
@@ -11,7 +11,7 @@ export function sessionSubscribe() {
                     const parsedMessage = JSON.parse(message.body);
                     const currentRefreshToken = getCookie('refreshToken');
 
-                    if (parsedMessage.refreshToken === currentRefreshToken && parsedMessage.service === process.env.VUE_APP_SERVICE_NAME) {
+                    if (parsedMessage.refreshToken === currentRefreshToken && parsedMessage.serviceName === process.env.VUE_APP_SERVICE_NAME) {
                         window.location.reload();
                     }
                 } catch (error) {

@@ -1,7 +1,7 @@
 <script>
-import { login } from "@/js/service/auth/auth";
-import { loginWithGoogle, loginWithFacebook, loginWithYandex } from "@/js/service/auth/redirect";
-import { setCookies } from "@/js/utils/cookie";
+import {setCookies} from "@/js/utils/cookie";
+import {loginWithFacebook, loginWithGoogle, loginWithYandex} from "@/js/utils/redirect";
+import {handleLogin} from "@/js/service/authService";
 
 export default {
   name: 'AuthComponent',
@@ -27,13 +27,8 @@ export default {
     loginWithGoogle,
     loginWithFacebook,
     loginWithYandex,
-    async login() {
-      try {
-        const response = await login(this.loginForm);
-        console.log(response.data);
-      } catch (error) {
-        console.error('Login failed:', error);
-      }
+    async handleLogin() {
+      await handleLogin(this.loginForm);
     }
   }
 };
@@ -41,7 +36,7 @@ export default {
 
 <template>
    <div>
-    <form @submit.prevent="login">
+    <form @submit.prevent="handleLogin">
       <div>
         <label for="username">Username</label>
         <input type="text" id="username" v-model="loginForm.username">

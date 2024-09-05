@@ -1,8 +1,12 @@
 import axios from 'axios';
-import { updateSession } from "@/js/service/session/session";
-import { getCookies, removeCookies, setCookies} from "@/js/utils/cookie";
+import {createSessionData, updateSession} from "@/js/repository/sessionRepository";
+import {getCookies, removeCookies, setCookies} from "@/js/utils/cookie";
 
-axios.defaults.baseURL = process.env.VUE_APP_BACK_BASE_URL
+axios.defaults.baseURL = process.env.VUE_APP_BACK_BASE_URL;
+axios.defaults.withCredentials = true;
+axios.defaults.withXSRFToken = true;
+
+let isRefreshing = false;
 
 axios.interceptors.response.use(
     async response => {
@@ -11,26 +15,35 @@ axios.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
 
-        if (error.response.status === 403 && !originalRequest._retry) {
+        if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            try {
-                const c = getCookies('accessToken', 'refreshToken');
-                const service = process.env.VUE_APP_SERVICE_NAME;
+            if (!isRefreshing) {
+                isRefreshing = true;
 
-                if (c.accessToken && c.refreshToken) {
-                    const response = await updateSession(null, service, c.accessToken, c.refreshToken);
+                try {
+                    const c = getCookies('accessToken', 'refreshToken');
+                    const serviceName = process.env.VUE_APP_SERVICE_NAME;
 
-                    setCookies({
-                        'accessToken': response.data.accessToken,
-                        'refreshToken': response.data.refreshToken
-                    });
+                    if (c.accessToken && c.refreshToken) {
+                        const sessionData = await createSessionData(serviceName, c.accessToken, c.refreshToken);
+                        const response = await updateSession(sessionData);
 
-                    originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
-                    return axios(originalRequest);
+                        setCookies({
+                            'accessToken': response.data.accessToken,
+                            'refreshToken': response.data.refreshToken
+                        });
+
+                        originalRequest.headers['Authorization'] = `Bearer ${response.data.accessToken}`;
+                        isRefreshing = false;
+                        return axios(originalRequest);
+                    }
+                } catch (error) {
+                    await removeCookies('accessToken', 'refreshToken');
+                    isRefreshing = false;
+                    return Promise.reject(error);
                 }
-            } catch (error) {
-                await removeCookies('accessToken', 'refreshToken');
+            } else {
                 return Promise.reject(error);
             }
         }

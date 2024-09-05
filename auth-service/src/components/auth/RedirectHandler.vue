@@ -1,6 +1,6 @@
 <script>
-import { handleRedirect} from "@/js/service/auth/redirect";
-import { sendCode } from "@/js/service/auth/auth";
+import {handleRedirect} from "@/js/utils/redirect";
+import {handleOauth} from "@/js/service/authService";
 
 export default {
   name: "RedirectHandler",
@@ -12,7 +12,7 @@ export default {
     };
   },
 
-  created() {
+  async created() {
     if (window.location.pathname.includes('google')) {
       this.providerName = 'google';
     } else if (window.location.pathname.includes('facebook')) {
@@ -21,24 +21,10 @@ export default {
       this.providerName = 'yandex';
     }
 
-    const code = handleRedirect();
-    if (code) {
-      this.code = code;
-      this.sendCode();
-    } else {
-      console.error('No code found in URL');
+    this.code = handleRedirect();
+    if (this.code) {
+      await handleOauth(this.code, this.providerName);
     }
-  },
-
-  methods: {
-    async sendCode() {
-      try {
-        const response = await sendCode(this.code, this.providerName)
-        console.log(response.data);
-      } catch (error) {
-        console.error('Error sending code:', error);
-      }
-    },
   }
 };
 </script>

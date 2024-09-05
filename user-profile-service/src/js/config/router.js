@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import MainComponent from "@/components/MainComponent.vue";
-import {getSession} from "@/js/service/session/session";
 import { setCookies } from "@/js/utils/cookie";
+import {getSession} from "@/js/repository/sessionRepository";
 
 const routes = [
 
@@ -16,10 +16,11 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
     const refreshToken = to.query.refreshToken;
+    const serviceName = process.env.VUE_APP_SERVICE_NAME;
 
-    if (refreshToken) {
+    if (refreshToken && serviceName) {
         try {
-            const response = await getSession(refreshToken);
+            const response = await getSession(serviceName, refreshToken);
 
             setCookies({
                 'accessToken': response.data.accessToken,
@@ -29,13 +30,13 @@ router.beforeEach(async (to, from, next) => {
             const queryWithoutToken = { ...to.query };
             delete queryWithoutToken.refreshToken;
 
-            next({ ...to, query: queryWithoutToken });
+            next({ path: to.path, query: queryWithoutToken });
         } catch (error) {
-            console.error("Session creation error", error);
             next();
         }
+    } else {
+        next();
     }
-    next();
 });
 
 export default router;

@@ -1,7 +1,7 @@
 <script>
-import { openAuthPage } from '@/js/service/auth/redirect';
-import {getCookie} from "@/js/utils/cookie";
 import axios from "@/js/config/axios";
+import {openAuthPage} from "@/js/utils/redirect";
+import {getCookie} from "@/js/utils/cookie";
 
 export default {
   name: "MainComponent",
@@ -9,10 +9,9 @@ export default {
     openAuthPage,
     async test() {
       try {
-        const accessToken = getCookie('accessToken');
-        const response = await axios.post('/api/test', null, {
+        const response = await axios.get('/api/test', {
           headers: {
-            Authorization: `Bearer ${accessToken}`
+            'Authorization': `Bearer ${getCookie('accessToken')}`
           }
         });
         console.log(response.data);

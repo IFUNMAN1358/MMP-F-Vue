@@ -1,13 +1,8 @@
-import { getCookie } from "@/js/utils/cookie";
-
-export function possibleRedirect(refreshToken) {
-    const redirectUri = getCookie('redirectUri');
+export function possibleRedirect(redirectUri, refreshToken) {
     if (redirectUri) {
-
         const params = new URLSearchParams({
             refreshToken: refreshToken
         });
-
         window.location.href = `${redirectUri}?${params.toString()}`;
     }
 }

@@ -2,6 +2,7 @@ const { DefinePlugin } = require('webpack');
 
 module.exports = {
   devServer: {
+    host: process.env.VUE_APP_HOST,
     port: parseInt(process.env.VUE_APP_PORT)
   },
   configureWebpack: {
